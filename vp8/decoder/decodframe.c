@@ -116,13 +116,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     int i;
     int corruption_detected = 0;
 
+    int eobtotal;
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {
         vp8_reset_mb_tokens_context(xd);
     }
     else if (!vp8dx_bool_error(xd->current_bc))
     {
-        int eobtotal;
         eobtotal = vp8_decode_mb_tokens(pbi, xd);
 
         /* Special case:  Force the loopfilter to skip when eobtotal is zero */
@@ -260,7 +260,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             {
                 BLOCKD *b = &xd->block[24];
                 short *qcoeff = &b->qcoeff_base[b->qcoeff_offset];
-                
+
                 /* do 2nd order transform on the dc block */
                 if (xd->eobs[24] > 1)
                 {
@@ -660,9 +660,9 @@ static void init_frame(VP8D_COMP *pbi)
         else
         {
 #if CONFIG_OPENCL
-            xd->sixtap_filter = CL_FALSE;            
+            xd->sixtap_filter = CL_FALSE;
 #endif
-            
+
             xd->subpixel_predict        = vp8_bilinear_predict4x4;
             xd->subpixel_predict8x4     = vp8_bilinear_predict8x4;
             xd->subpixel_predict8x8     = vp8_bilinear_predict8x8;
@@ -1133,7 +1133,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #if CONFIG_OPENCL && (ENABLE_CL_IDCT_DEQUANT || ENABLE_CL_SUBPIXEL)
     vp8_decode_frame_cl_finish(pbi);
 #endif
-    
+
     stop_token_decoder(pbi);
 
     /* Collect information about decoder corruption. */

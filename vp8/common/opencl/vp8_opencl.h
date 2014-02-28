@@ -30,12 +30,12 @@ extern "C" {
 #else
 #define VP8_CL_MEM_ALLOC_TYPE CL_MEM_ALLOC_HOST_PTR
 #endif
-    
+
 #if HAVE_DLOPEN
 #include "dynamic_cl.h"
 #endif
 
-#define ENABLE_CL_IDCT_DEQUANT 0
+#define ENABLE_CL_IDCT_DEQUANT 1
 #define ENABLE_CL_SUBPIXEL 0
 #define ENABLE_CL_LOOPFILTER 1
 #define TWO_PASS_SIXTAP 0
@@ -240,7 +240,7 @@ typedef struct VP8_COMMON_CL {
     size_t vp8_loop_filter_horizontal_edges_kernel_size;
     cl_kernel vp8_loop_filter_vertical_edges_kernel;
     size_t vp8_loop_filter_vertical_edges_kernel_size;
-    
+
     cl_kernel vp8_loop_filter_simple_all_edges_kernel;
     size_t vp8_loop_filter_simple_all_edges_kernel_size;
 
@@ -248,10 +248,10 @@ typedef struct VP8_COMMON_CL {
     size_t vp8_loop_filter_simple_horizontal_edges_kernel_size;
     cl_kernel vp8_loop_filter_simple_vertical_edges_kernel;
     size_t vp8_loop_filter_simple_vertical_edges_kernel_size;
-    
+
     int vp8_loop_filter_combine_planes;
     int vp8_loop_filter_uint_buffer;
-    
+
     cl_program dequant_program;
     cl_kernel vp8_dequant_dc_idct_add_kernel;
     cl_kernel vp8_dequant_idct_add_kernel;
@@ -259,7 +259,7 @@ typedef struct VP8_COMMON_CL {
 
     cl_int cl_decode_initialized;
     cl_int cl_encode_initialized;
-    
+
 } VP8_COMMON_CL;
 
 extern VP8_COMMON_CL cl_data;

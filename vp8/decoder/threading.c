@@ -186,13 +186,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
                 if (xd->eobs[i] > 1)
                 {
                     vp8_dequant_idct_add
-                        (b->qcoeff, DQC,
+                        (qcoeff, DQC,
                         *(b->base_dst) + b->dst, b->dst_stride);
                 }
                 else
                 {
                     vp8_dc_only_idct_add
-                        (b->qcoeff[0] * DQC[0],
+                        (*qcoeff * DQC[0],
                         *(b->base_dst) + b->dst, b->dst_stride,
                         *(b->base_dst) + b->dst, b->dst_stride);
                     ((int *)qcoeff)[0] = 0;

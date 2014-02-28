@@ -33,7 +33,7 @@ extern void cl_decode_destroy();
 extern void cl_encode_destroy();
 
 /**
- * 
+ *
  * @param cq
  * @param new_status
  */
@@ -84,7 +84,7 @@ void cl_destroy(cl_command_queue cq, int new_status) {
 }
 
 /**
- * 
+ *
  * @param dev
  * @return
  */
@@ -99,7 +99,7 @@ cl_device_type device_type(cl_device_id dev){
 }
 
 /**
- * 
+ *
  * @return
  */
 int cl_common_init() {
@@ -128,7 +128,7 @@ int cl_common_init() {
     //printf("Enumerating %d platform(s)\n", num_found);
     //Enumerate the platforms found
     for (i = 0; i < num_found; i++){
-#if 0
+#if 1
         char buf[2048];
         size_t len;
 
@@ -159,20 +159,20 @@ int cl_common_init() {
 #else
         err = clGetDeviceIDs(platform_ids[i], CL_DEVICE_TYPE_ALL, MAX_NUM_DEVICES, devices, &num_devices);
 #endif //Snow Leopard
-        //printf("found %d devices\n", num_devices);
+        printf("found %d devices\n", num_devices);
         cl_data.device_id = NULL;
         for( dev = 0; dev < num_devices; dev++ ){
 #if ENABLE_CL_IDCT_DEQUANT == 1 || ENABLE_CL_SUBPIXEL == 1
             char ext[2048];
-            
+
             //Get info for this device.
             err = clGetDeviceInfo(devices[dev], CL_DEVICE_EXTENSIONS,
                     sizeof(ext),ext,NULL);
             VP8_CL_CHECK_SUCCESS(NULL,err != CL_SUCCESS,
                     "Error retrieving device extension list",continue, 0);
-            
+
             //printf("Device %d supports: %s\n",dev,ext);
-            
+
             //The prediction/IDCT kernels in VP8 require byte-addressable stores, which is an
             //extension. It's required in OpenCL 1.1, but not all devices
             //support that version.
@@ -184,7 +184,7 @@ int cl_common_init() {
                 //(maybe this is one), prefer that.
                 cl_data.device_id = devices[dev];
                 cl_data.device_type = device_type(devices[dev]);
-                
+
                 if ( cl_data.device_type == CL_DEVICE_TYPE_GPU ){
                     //printf("Device %d is a GPU\n",dev);
                     break;
@@ -231,7 +231,6 @@ int cl_common_init() {
 #endif
 
 #if ENABLE_CL_LOOPFILTER
-
     err = cl_init_loop_filter();
     if (err != CL_SUCCESS)
         return err;
@@ -244,23 +243,23 @@ int cl_common_init() {
 char *cl_get_file_path(const char* file_name, char *ext){
     char *fullpath;
     FILE *f;
-    
+
     fullpath = malloc(strlen(file_name) + strlen(ext) + 1);
     if (fullpath == NULL){
         return NULL;
     }
-    
+
     strcpy(fullpath, file_name);
     strcat(fullpath, ext);
-    
+
     f = fopen(fullpath, "rb");
     if (f != NULL){
         fclose(f);
         return fullpath;
     }
-    
+
     free(fullpath);
-    
+
     //Generate a file path for the CL sources using the library install dir
     fullpath = malloc(strlen(vpx_codec_lib_dir()) + strlen(file_name) + strlen(ext) + 2);
     if (fullpath == NULL) {
@@ -287,7 +286,7 @@ char *cl_read_file(const char* file_name, int pad, size_t *size) {
     FILE *f;
 
     *size = 0;
-    
+
     if (file_name == NULL){
         return NULL;
     }
@@ -303,7 +302,7 @@ char *cl_read_file(const char* file_name, int pad, size_t *size) {
     fseek(f, 0, SEEK_SET);
     *size = pos + pad;
     bytes = malloc(*size);
-    
+
     if (bytes == NULL) {
         fclose(f);
         return NULL;
@@ -322,7 +321,7 @@ char *cl_read_file(const char* file_name, int pad, size_t *size) {
                 bytes[pos+i] = '\0'; //null terminate the source string
         }
     }
-    
+
     fclose(f);
 
     return bytes;
@@ -358,16 +357,16 @@ void show_build_log(cl_program *prog_ref){
     } else {
         int err = clGetProgramBuildInfo(*prog_ref, cl_data.device_id, CL_PROGRAM_BUILD_OPTIONS, 0, NULL, &len);
         if (err == CL_SUCCESS){
-                char *opts = malloc(len);            
+                char *opts = malloc(len);
                 if (opts != NULL){
                     err = clGetProgramBuildInfo(*prog_ref, cl_data.device_id, CL_PROGRAM_BUILD_OPTIONS, len, opts, NULL);
                     if (err == CL_SUCCESS){
                         printf("Program build options:\n%s\n", opts);
                     }
-                    free(opts);                    
+                    free(opts);
                 }
         }
-        
+
         printf("Compile output:\n%s\n", buffer);
     }
     free(buffer);
@@ -378,16 +377,19 @@ cl_int vp8_cl_save_binary(const char *file_name, const char *ext, cl_program *pr
     char *binary;
     size_t size;
     FILE *out;
-    
+
     char *bin_file = malloc(strlen(file_name)+strlen(ext)+1);
     if (bin_file == NULL){
         return VP8_CL_TRIED_BUT_FAILED;
     }
     strcpy(bin_file, file_name);
     strcat(bin_file, ext);
-    
+
     err = clBuildProgram(*prog_ref, 0, NULL, prog_opts, NULL, NULL);
-    clGetProgramInfo( *prog_ref, CL_PROGRAM_BINARY_SIZES, sizeof(size), &size, NULL );
+    printf("Miguelao1\n");
+    clGetProgramInfo( *prog_ref, CL_PROGRAM_BINARY_SIZES, sizeof(size), &size,
+                      NULL );
+    printf("Miguelao2\n");
 
     binary = (char *)malloc(size);
     if (binary == NULL){
@@ -398,7 +400,7 @@ cl_int vp8_cl_save_binary(const char *file_name, const char *ext, cl_program *pr
 
     err = clGetProgramInfo( *prog_ref, CL_PROGRAM_BINARIES, sizeof(char**), &binary, NULL );
     VP8_CL_CHECK_SUCCESS(NULL, err != CL_SUCCESS, "Couldn't get program info\n", , VP8_CL_TRIED_BUT_FAILED);
-    
+
     out = fopen( bin_file, "wb" );
     if (out != NULL){
         fwrite( binary, sizeof(char), size, out );
@@ -406,9 +408,9 @@ cl_int vp8_cl_save_binary(const char *file_name, const char *ext, cl_program *pr
     } else {
         //printf("Couldn't save binary kernel\n");
     }
-    
+
     free(bin_file);
-    
+
     return CL_SUCCESS;
 }
 
@@ -417,25 +419,25 @@ int cl_use_binary_kernel(char *src_file, char *bin_file){
 
     struct stat src_stat;
     struct stat bin_stat;
-    
+
     ret = (bin_file != NULL);
     if (bin_file == NULL){
         return ret;
     }
-    
+
     //Stat the two files. If either fails, use current return code
     //Note: Useful if you have source or binary kernels, but not both
     if (stat(src_file, &src_stat) || stat(bin_file, &bin_stat)){
         return ret;
     }
-        
+
     //Get the modified date for each, and make sure that binary is newer than src
 #ifdef __APPLE__
     ret = bin_stat.st_mtime > src_stat.st_mtime;
 #else
     ret = bin_stat.st_mtim.tv_sec > src_stat.st_mtim.tv_sec;
 #endif
-    
+
     return ret;
 }
 
@@ -447,7 +449,7 @@ int cl_load_program(cl_program *prog_ref, const char *file_name, const char *opt
     char *kernel_src;
     char *kernel_bin;
     size_t size; //Size of loaded kernel src/bin file
-    
+
     *prog_ref = NULL;
 
     src_file = cl_get_file_path(file_name, ".cl");
@@ -481,7 +483,7 @@ int cl_load_program(cl_program *prog_ref, const char *file_name, const char *opt
             free(kernel_bin);
         }
     }
-   
+
     //Binary kernel failed, compile source instead
     if (*prog_ref == NULL){
         kernel_src = cl_read_source_file(src_file, &size);
@@ -495,12 +497,12 @@ int cl_load_program(cl_program *prog_ref, const char *file_name, const char *opt
             if (err != CL_SUCCESS) {
                 printf("Error creating program: %d\n", err);
             }
-            
+
             //Attempt to save program binary
             if (*prog_ref != NULL){
-                vp8_cl_save_binary(file_name, ".bin", prog_ref, opts);
-                free(bin_file);
-                
+                //vp8_cl_save_binary(file_name, ".bin", prog_ref, opts);
+                //free(bin_file);
+
                 /* Build the program executable */
                 err = clBuildProgram(*prog_ref, 0, NULL, opts, NULL, NULL);
                 if (err != CL_SUCCESS) {
