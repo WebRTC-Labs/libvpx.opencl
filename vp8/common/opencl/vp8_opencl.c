@@ -386,10 +386,8 @@ cl_int vp8_cl_save_binary(const char *file_name, const char *ext, cl_program *pr
     strcat(bin_file, ext);
 
     err = clBuildProgram(*prog_ref, 0, NULL, prog_opts, NULL, NULL);
-    printf("Miguelao1\n");
     clGetProgramInfo( *prog_ref, CL_PROGRAM_BINARY_SIZES, sizeof(size), &size,
                       NULL );
-    printf("Miguelao2\n");
 
     binary = (char *)malloc(size);
     if (binary == NULL){
